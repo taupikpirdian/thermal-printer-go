@@ -54,3 +54,16 @@ type LineWriter interface {
     AppendRaw(string)
     NewLine()
 }
+
+type Settings struct {
+    IDMerchant   string
+    NameMerchant string
+    PrinterName  string
+    PaperWidth   int
+    Offsite      int
+    TopicPrefix  string
+}
+
+type SettingsRepository interface {
+    Get() (Settings, error)
+}

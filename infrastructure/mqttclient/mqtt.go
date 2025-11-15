@@ -10,8 +10,15 @@ import (
 )
 
 type Subscriber struct {
-	Client mqtt.Client
+    Client mqtt.Client
 }
+
+type MQTTSubscriber interface {
+    Subscribe(topic string, handler func([]byte)) error
+    Disconnect()
+}
+
+var _ MQTTSubscriber = (*Subscriber)(nil)
 
 func NewSubscriberFromEnv() (*Subscriber, error) {
 	broker := os.Getenv("MQTT_BROKER_URL")

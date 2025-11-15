@@ -116,7 +116,7 @@ func (uc PrintInvoiceUseCase) Execute(p PrinterEngine, payload domain.Payload) e
 	return nil
 }
 
-func (uc PrintInvoiceUseCase) ExecuteTestImage(p PrinterEngine, payload domain.Payload) error {
-    _ = p.PrintImageURLScaled(payload.Logo, 200)
-    return nil
+func (uc PrintInvoiceUseCase) ExecuteTestImageTest(p PrinterEngine, payload domain.Payload) error {
+	_ = p.PrintImageURLScaled(payload.Logo, 200)
+	return nil
 }
