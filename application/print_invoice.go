@@ -11,19 +11,30 @@ type PrintInvoiceUseCase struct {
 }
 
 func (uc PrintInvoiceUseCase) Execute(p PrinterEngine, payload domain.Payload) error {
-	p.AlignCenter()
 	if payload.Logo != "" {
-		_ = p.PrintImageURL(payload.Logo)
+		_ = p.PrintImageURLScaled(payload.Logo, 200)
 	}
-	p.BoldOn()
-	p.Size(2, 2)
-	p.AppendRaw(payload.Header.Title + "\n")
-	p.SizeReset()
-	p.BoldOff()
-	p.NewLines(1)
 
+	p.AlignCenter()
+	p.Size(2, 2)
 	p.BoldOn()
 	p.AppendRaw(payload.MerchantName + "\n")
+	p.SizeReset()
+	p.BoldOff()
+
+	p.AlignCenter()
+	p.AppendRaw("Authorized Money Changer \n")
+	p.SizeReset()
+	p.BoldOff()
+
+	p.AlignCenter()
+	p.AppendRaw("No Izin: " + payload.Header.BusinessLicenseNumber + "\n")
+	p.SizeReset()
+	p.BoldOff()
+
+	p.AlignCenter()
+	p.AppendRaw("Tgl Terbit: " + payload.Header.BusinessLicenseDate + "\n")
+	p.SizeReset()
 	p.BoldOff()
 
 	if payload.AdvanceHeader {
@@ -34,6 +45,14 @@ func (uc PrintInvoiceUseCase) Execute(p PrinterEngine, payload domain.Payload) e
 	} else {
 		p.NewLines(1)
 	}
+
+	p.AlignCenter()
+	p.Size(2, 2)
+	p.BoldOn()
+	p.AppendRaw(payload.Header.Title + "\n")
+	p.SizeReset()
+	p.BoldOff()
+	p.NewLine()
 
 	p.AlignLeft()
 	domain.PrintInvoiceItem(p, uc.PaperWidth, "No. Transaksi    :", payload.NoOrder)
@@ -111,12 +130,7 @@ func (uc PrintInvoiceUseCase) Execute(p PrinterEngine, payload domain.Payload) e
 	p.BoldOff()
 	domain.PrintLeftAlignedText(p, uc.PaperWidth, strings.ReplaceAll(payload.Footer.NoteID, "<br>", "\n"))
 	domain.PrintLeftAlignedText(p, uc.PaperWidth, strings.ReplaceAll(payload.Footer.NoteEN, "<br>", "\n"))
-	p.NewLines(2)
+	p.NewLines(6)
 	p.SizeReset()
-	return nil
-}
-
-func (uc PrintInvoiceUseCase) ExecuteTestImageTest(p PrinterEngine, payload domain.Payload) error {
-	_ = p.PrintImageURLScaled(payload.Logo, 200)
 	return nil
 }
