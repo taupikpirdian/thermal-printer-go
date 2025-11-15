@@ -15,17 +15,18 @@ import (
 )
 
 func main() {
-	_ = cfg.LoadDotEnv(".env")
-	settings, err := cfg.LoadSettings()
-	if err != nil {
-		log.Fatalf("load settings: %v", err)
-	}
+    _ = cfg.LoadDotEnv(".env")
+    settings, err := cfg.LoadSettings()
+    if err != nil {
+        log.Fatalf("load settings: %v", err)
+    }
+    log.Printf("Startup OK | Merchant: %s | Printer: %s | Width: %d | Offsite: %d", settings.NameMerchant, settings.PrinterName, settings.PaperWidth, settings.Offsite)
 
-	sub, err := mqttclient.NewSubscriberFromEnv()
-	if err != nil {
-		log.Fatalf("mqtt connect: %v", err)
-	}
-	defer sub.Disconnect()
+    sub, err := mqttclient.NewSubscriberFromEnv()
+    if err != nil {
+        log.Fatalf("mqtt connect: %v", err)
+    }
+    defer sub.Disconnect()
 
 	topic := settings.TopicPrefix + settings.IDMerchant
 	uc := application.PrintInvoiceUseCase{PaperWidth: settings.PaperWidth}
@@ -66,9 +67,10 @@ func main() {
         }
         log.Println(strings.TrimSpace("Pencetakan Selesai"))
     })
-	if err != nil {
-		log.Fatalf("mqtt subscribe: %v", err)
-	}
+    if err != nil {
+        log.Fatalf("mqtt subscribe: %v", err)
+    }
+    log.Printf("MQTT subscribe OK | topic=%s", topic)
 	broker := os.Getenv("MQTT_BROKER_URL")
 	if broker == "" {
 		host := os.Getenv("MQTT_HOST")
@@ -81,6 +83,6 @@ func main() {
 		}
 		broker = "tcp://" + host + ":" + port
 	}
-	log.Printf("Client ready | Broker: %s | Topic: %s | Printer: %s", broker, topic, settings.PrinterName)
-	select {}
+    log.Printf("Client ready | Broker: %s | Topic: %s | Printer: %s", broker, topic, settings.PrinterName)
+    select {}
 }
