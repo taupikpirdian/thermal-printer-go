@@ -98,6 +98,13 @@ Saat ini entrypoint memanggil use case uji gambar (`ExecuteTestImage`) yang hany
 - `No connection could be made ... [::1]:1883`: pastikan env `MQTT_HOST`/`MQTT_BROKER_URL` terbaca. Gunakan `.env` dan loader sudah aktif.
 - `open printer` gagal: pastikan `PRINTER_NAME` sama persis dengan nama di Control Panel.
 
+## How To Build with Named Executable with date build
+- Clone repository: `git clone https://cicd-gitlab-ee.telkomsel.co.id/homelte/ms/device/go-printer-termal.git`
+- Masuk ke direktori: `cd go-printer-termal`
+- Build: `go build -o valas-print-midas.exe ./cmd/printer`
+
+
+
 ## Keamanan
 - Jangan commit `.env` berisi kredensial. Gunakan `.env.example` sebagai referensi.
 

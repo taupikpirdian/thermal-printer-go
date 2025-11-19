@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	_ = cfg.LoadDotEnv(".env")
+    cfg.LoadDefaultEnv()
 	settings, err := cfg.LoadSettings()
 	if err != nil {
 		log.Fatalf("load settings: %v", err)

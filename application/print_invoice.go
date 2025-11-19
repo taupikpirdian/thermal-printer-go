@@ -1,7 +1,6 @@
 package application
 
 import (
-	"fmt"
 	"other/go-printer-termal/domain"
 	"strings"
 )
@@ -75,8 +74,8 @@ func (uc PrintInvoiceUseCase) Execute(p PrinterEngine, payload domain.Payload) e
 	p.AppendRaw(domain.RepeatRune('-', uc.PaperWidth) + "\n")
 
 	for _, d := range payload.DetailOrder {
-		amountStr := fmt.Sprintf("%v", d.Amount)
-		totalStr := fmt.Sprintf("%v", d.Total)
+		amountStr := domain.FormatNumberID(int64(d.Amount.(float64)))
+		totalStr := domain.FormatNumberID(int64(d.Total.(float64)))
 		domain.PrintInvoiceItem(p, uc.PaperWidth, "Currency :", d.Currency)
 		domain.PrintInvoiceItem(p, uc.PaperWidth, "Amount   :", amountStr)
 		domain.PrintInvoiceItem(p, uc.PaperWidth, "Rate     :", d.Rate)

@@ -2,8 +2,11 @@ package config
 
 import (
     "bufio"
+    "encoding/base64"
+    "encoding/json"
     "os"
     "strings"
+    "path/filepath"
 )
 
 func LoadDotEnv(path string) error {
@@ -28,4 +31,41 @@ func LoadDotEnv(path string) error {
         _ = os.Setenv(key, val)
     }
     return nil
+}
+
+func LoadDotEnvIfExists(path string) error {
+    if strings.TrimSpace(path) == "" { return nil }
+    if _, err := os.Stat(path); err != nil { return nil }
+    return LoadDotEnv(path)
+}
+
+var EmbeddedEnvBase64 string
+
+func LoadEmbeddedEnv() {
+    s := strings.TrimSpace(EmbeddedEnvBase64)
+    if s == "" { return }
+    b, err := base64.StdEncoding.DecodeString(s)
+    if err != nil { return }
+    var m map[string]string
+    if json.Unmarshal(b, &m) != nil { return }
+    for k, v := range m {
+        _ = os.Setenv(k, v)
+    }
+}
+
+func LoadDefaultEnv() {
+    LoadEmbeddedEnv()
+    _ = LoadDotEnvIfExists(".env")
+    exe, err := os.Executable()
+    if err == nil {
+        _ = LoadDotEnvIfExists(filepath.Join(filepath.Dir(exe), ".env"))
+    }
+    appdata := os.Getenv("APPDATA")
+    if appdata != "" {
+        _ = LoadDotEnvIfExists(filepath.Join(appdata, "MidasPrinter", ".env"))
+    }
+    programData := os.Getenv("ProgramData")
+    if programData != "" {
+        _ = LoadDotEnvIfExists(filepath.Join(programData, "MidasPrinter", ".env"))
+    }
 }
