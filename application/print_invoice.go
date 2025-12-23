@@ -62,7 +62,8 @@ func (uc PrintInvoiceUseCase) Execute(p PrinterEngine, payload domain.Payload) e
 	p.AppendRaw("Alamat\n")
 	domain.PrintLeftAlignedText(p, uc.PaperWidth, payload.CustomerAddress)
 	domain.PrintInvoiceItem(p, uc.PaperWidth, "No. Telp         :", payload.CustomerPhone)
-	domain.PrintInvoiceItem(p, uc.PaperWidth, "Tujuan Transaksi :", "")
+	domain.PrintInvoiceItem(p, uc.PaperWidth, "Tujuan Transaksi :", payload.TransactionPurpose)
+	domain.PrintInvoiceItem(p, uc.PaperWidth, "Sumber Dana      :", payload.SourceOfFund)
 	domain.PrintInvoiceItem(p, uc.PaperWidth, "Catatan          :", payload.Notes)
 	p.NewLines(2)
 
