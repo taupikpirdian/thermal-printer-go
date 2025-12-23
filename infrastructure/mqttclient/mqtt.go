@@ -1,0 +1,78 @@
+package mqttclient
+
+import (
+	"log"
+	"os"
+	"strconv"
+	"time"
+
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+)
+
+type Subscriber struct {
+    Client mqtt.Client
+}
+
+type MQTTSubscriber interface {
+    Subscribe(topic string, handler func([]byte)) error
+    Disconnect()
+}
+
+var _ MQTTSubscriber = (*Subscriber)(nil)
+
+func NewSubscriberFromEnv() (*Subscriber, error) {
+	broker := os.Getenv("MQTT_BROKER_URL")
+	if broker == "" {
+		host := os.Getenv("MQTT_HOST")
+		if host == "" {
+			host = "localhost"
+		}
+		port := os.Getenv("MQTT_PORT")
+		if port == "" {
+			port = "1883"
+		}
+		broker = "tcp://" + host + ":" + port
+	}
+	user := os.Getenv("MQTT_USERNAME")
+	pass := os.Getenv("MQTT_PASSWORD")
+	if user == "" {
+		user = os.Getenv("MQTT_AUTH_USERNAME")
+	}
+	if pass == "" {
+		pass = os.Getenv("MQTT_AUTH_PASSWORD")
+	}
+	clientID := os.Getenv("MQTT_CLIENT_ID")
+	if clientID == "" {
+		clientID = "go-printer-" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	}
+	opts := mqtt.NewClientOptions().AddBroker(broker).SetClientID(clientID).SetUsername(user).SetPassword(pass).SetCleanSession(true).SetAutoReconnect(true)
+	opts.SetOnConnectHandler(func(c mqtt.Client) { log.Printf("MQTT connected | broker=%s | client_id=%s", broker, clientID) })
+	opts.SetConnectionLostHandler(func(c mqtt.Client, err error) { log.Printf("MQTT connection lost: %v", err) })
+	opts.SetReconnectingHandler(func(c mqtt.Client, _ *mqtt.ClientOptions) {
+		log.Printf("MQTT reconnecting | broker=%s | client_id=%s", broker, clientID)
+	})
+	c := mqtt.NewClient(opts)
+	t := c.Connect()
+	t.Wait()
+	if t.Error() != nil {
+		return nil, t.Error()
+	}
+	log.Printf("MQTT connect OK | broker=%s | client_id=%s", broker, clientID)
+	return &Subscriber{Client: c}, nil
+}
+
+func (s *Subscriber) Subscribe(topic string, handler func([]byte)) error {
+	t := s.Client.Subscribe(topic, 0, func(_ mqtt.Client, m mqtt.Message) { handler(m.Payload()) })
+	t.Wait()
+	if t.Error() != nil {
+		return t.Error()
+	}
+	log.Printf("MQTT subscribed | topic=%s | qos=%d", topic, 0)
+	return nil
+}
+
+func (s *Subscriber) Disconnect() {
+	if s.Client != nil {
+		s.Client.Disconnect(250)
+	}
+}

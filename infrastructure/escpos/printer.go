@@ -47,8 +47,9 @@ func (e *EscposPrinter) PrintImageURL(url string) error {
     img, err := loadImage(url)
     if err != nil { return err }
     e.write([]byte{0x1B, 0x40})
+    e.write([]byte{0x1B, 0x61, 0x02})
     e.write(convertToBitImage(img))
-    e.NewLine()
+    e.write([]byte{0x1B, 0x61, 0x00})
     return nil
 }
 
@@ -58,8 +59,9 @@ func (e *EscposPrinter) PrintImageURLScaled(url string, maxWidth int) error {
     if err != nil { return err }
     scaled := resizeToWidth(img, maxWidth)
     e.write([]byte{0x1B, 0x40})
+    e.write([]byte{0x1B, 0x61, 0x02})
     e.write(convertToBitImage(scaled))
-    e.NewLine()
+    e.write([]byte{0x1B, 0x61, 0x00})
     return nil
 }
 
@@ -68,7 +70,8 @@ func (e *EscposPrinter) PrintImageFile(path string) error {
     img, err := loadLocalImage(path)
     if err != nil { return err }
     e.write([]byte{0x1B, 0x40})
+    e.write([]byte{0x1B, 0x61, 0x02})
     e.write(convertToBitImage(img))
-    e.NewLine()
+    e.write([]byte{0x1B, 0x61, 0x00})
     return nil
 }
