@@ -101,9 +101,8 @@ Saat ini entrypoint memanggil use case uji gambar (`ExecuteTestImage`) yang hany
 ## How To Build with Named Executable with date build
 - Clone repository: `git clone https://cicd-gitlab-ee.telkomsel.co.id/homelte/ms/device/go-printer-termal.git`
 - Masuk ke direktori: `cd go-printer-termal`
-- Build: `go build -o valas-print-midas.exe ./cmd/printer`
-
-
+- Open wsl
+- Build: sh scripts/build_with_secrets.sh
 
 ## Keamanan
 - Jangan commit `.env` berisi kredensial. Gunakan `.env.example` sebagai referensi.
