@@ -10,12 +10,10 @@ import (
 	escpos "other/go-printer-termal/infrastructure/escpos"
 	mqttclient "other/go-printer-termal/infrastructure/mqttclient"
 	"strings"
-
-	"github.com/alexbrainman/printer"
 )
 
 func main() {
-    cfg.LoadDefaultEnv()
+	cfg.LoadDefaultEnv()
 	settings, err := cfg.LoadSettings()
 	if err != nil {
 		log.Fatalf("load settings: %v", err)
@@ -40,7 +38,7 @@ func main() {
 			return
 		}
 		log.Printf("Parsed payload | order=%s | merchant=%s", payload.NoOrder, payload.MerchantName)
-		p, err := printer.Open(settings.PrinterName)
+		p, err := openRawPrinter(settings.PrinterName)
 		if err != nil {
 			log.Println("open printer:", err)
 			return
