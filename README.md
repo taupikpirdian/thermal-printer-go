@@ -50,11 +50,59 @@ Optional `setting.xml` di working directory:
 ```
 Nilai env akan mengoverride file ini.
 
-## Menjalankan
-Build:
+## Menjalankan dari Source
+Pastikan `.env` sudah tersedia di root project, lalu jalankan:
 ```
-go build ./cmd/printer
+go run ./cmd/printer
 ```
+
+Jika berhasil, terminal akan menampilkan:
+```
+Client ready | Broker: tcp://<host>:<port> | Topic: <topic> | Printer: <printer>
+```
+
+Catatan:
+- Printing langsung ke Windows spooler hanya berjalan di Windows.
+- Di macOS/Linux, aplikasi bisa di-build untuk validasi compile, tetapi saat menerima pesan MQTT akan gagal membuka printer dengan pesan bahwa raw Windows printer tidak didukung.
+
+## Build Executable
+
+### Build di Windows
+Jalankan dari root project:
+```
+go build -o valas-print-midas.exe ./cmd/printer
+```
+
+Lalu jalankan:
+```
+.\valas-print-midas.exe
+```
+
+### Build `.exe` dari macOS/Linux
+Gunakan cross compile:
+```
+GOOS=windows GOARCH=amd64 go build -o valas-print-midas.exe ./cmd/printer
+```
+
+Jika environment membatasi lokasi Go build cache, arahkan cache ke folder sementara:
+```
+GOCACHE=/tmp/thermal-printer-go-cache GOOS=windows GOARCH=amd64 go build -o valas-print-midas.exe ./cmd/printer
+```
+
+### Build untuk Validasi Lokal
+Untuk memastikan semua package compile di OS saat ini:
+```
+go test ./...
+go build -o /tmp/thermal-printer-go-printer ./cmd/printer
+```
+
+## Menjalankan Executable
+Letakkan `.env` di salah satu lokasi berikut:
+- Folder tempat executable dijalankan
+- Folder yang sama dengan file `.exe`
+- `%APPDATA%\MidasPrinter\.env`
+- `%ProgramData%\MidasPrinter\.env`
+
 Jalankan executable. Saat berhasil inisialisasi, terminal menampilkan:
 ```
 Client ready | Broker: tcp://<host>:<port> | Topic: <topic> | Printer: <printer>
@@ -85,7 +133,7 @@ Aplikasi mengharapkan JSON seperti berikut (dipersingkat):
   "footer": { "note_id": "...", "note_en": "..." }
 }
 ```
-Saat ini entrypoint memanggil use case uji gambar (`ExecuteTestImage`) yang hanya mencetak gambar dari `logo`. Untuk cetak struk lengkap, ubah handler menjadi memanggil `Execute` di `cmd/printer/main.go`.
+Entrypoint saat ini memanggil `Execute` di `cmd/printer/main.go` untuk mencetak struk lengkap.
 
 ## Tuning Gambar
 - Ubah lebar gambar di `application/print_invoice.go` pada pemanggilan `PrintImageURLScaled(payload.Logo, 200)`
@@ -97,13 +145,6 @@ Saat ini entrypoint memanggil use case uji gambar (`ExecuteTestImage`) yang hany
 - Gambar terpotong: turunkan `maxWidth` atau tambah padding horizontal (`OFFSITE`).
 - `No connection could be made ... [::1]:1883`: pastikan env `MQTT_HOST`/`MQTT_BROKER_URL` terbaca. Gunakan `.env` dan loader sudah aktif.
 - `open printer` gagal: pastikan `PRINTER_NAME` sama persis dengan nama di Control Panel.
-
-## How To Build with Named Executable with date build
-- Clone repository: `git clone https://cicd-gitlab-ee.telkomsel.co.id/homelte/ms/device/go-printer-termal.git`
-- Masuk ke direktori: `cd go-printer-termal`
-- Build: `go build -o valas-print-midas.exe ./cmd/printer`
-
-
 
 ## Keamanan
 - Jangan commit `.env` berisi kredensial. Gunakan `.env.example` sebagai referensi.
